@@ -62,7 +62,6 @@ var checkIfUserExist = function(){
             ownStocks : [],
             cash : startCash,
             startInformation:[moment().format('YYYY-MM-DD'),startCash]
-
         };
         console.log(userInformation);
         saveToLocalStorage();
@@ -218,9 +217,8 @@ var availableStocksToSell = function(){
     }
 }
 
-//Main sele function 
+//Main sell function 
 var mainSellFunction = function(){
-
     var ownedStocks = userInformation.ownStocks
     const sellStockSymbol = $(".sellOptionSelect").val()
     const sellStockQuantity = $("#sellQuantity").val()
