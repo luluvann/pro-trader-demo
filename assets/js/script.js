@@ -3,6 +3,10 @@ var stockWorth = 0;
 var lines = [];
 var apiKeys = ['SRKIT2G4W4EWBWB5','MRZGIXHX6J4WPIDJ','CAQK57WJYT0W3JUP'];
 var apiKeyIndex = 0;
+var conversionModel = {
+    rates : {USD : 1},
+    selectedCurrency : "USD",
+};
 
 function apiKey(){;
     apiKeyIndex ++
@@ -205,11 +209,11 @@ var saveToLocalStorage = function(){
     localStorage.setItem('userInformation',JSON.stringify(userInformation));
 }
 
-
 /*Sell functions*/
 
 //get the array of the Stocks owned by the user from Local Storage and display in Sell Modal
 var availableStocksToSell = function(){
+    var userInformation = JSON.parse(localStorage.getItem('userInformation'));
     var ownedStocks = userInformation.ownStocks
     $("#inlineFormCustomSelect").empty()
     for(var i = 0; i < ownedStocks.length ; i++){
@@ -217,57 +221,73 @@ var availableStocksToSell = function(){
     }
 }
 
-//Main sell function 
-var mainSellFunction = function(){
-    var ownedStocks = userInformation.ownStocks
-    const sellStockSymbol = $(".sellOptionSelect").val()
-    const sellStockQuantity = $("#sellQuantity").val()
+//Substract the sell worth from the total stock worth and total
+var substractSellInStockTotal = function(sellStockSymbol, sellStockQuantity){
+    const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${sellStockSymbol}&apikey=CAQK57WJYT0W3JUP`
+    fetch(url)
+    .then(response => response.json())
+    .then(function(data){
+        const priceSellStock = parseFloat(data["Global Quote"]["05. price"]).toFixed(2)
+        //Substract the sell amount from total stock worth
+        stockWorth-= priceSellStock*sellStockQuantity
+        $("#stockWorth").text(stockWorth)
+        //Substract the sell amount from total
+        currentTotal = parseFloat($("#total").text())
+        newTotal= parseFloat(currentTotal - priceSellStock*sellStockQuantity).toFixed(2)
+        $("#total").text(newTotal)
+    })
+}
 
+//Update Table with current price for each share owned
+var updateTableAfterSell = function(newUserInformation){
+    //Clear the current table
+    $("#myStocksTable").empty()
+    //Loop through the array of stocks owned and add a new row to the table with corresponding data
+    for(var i = 0 ; i < newUserInformation.ownStocks.length; i++){
+        const stockSymbol = newUserInformation.ownStocks[i].symbol
+        const stockQuantity = parseFloat(newUserInformation.ownStocks[i].quantity).toFixed(0)
+        const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${stockSymbol}&apikey=demo`
+        fetch(url)
+        .then(response => response.json())
+        .then(function(data){
+           var stockPrice = parseFloat(data['Global Quote']['05. price']).toFixed(2)
+           //Recreate the Table from scratch and append the updated list of stocks available
+           $("#myStocksTable").append(
+               `<tr>
+                    <td>${stockSymbol}</td>
+                    <td>${stockQuantity}</td>
+                    <td>${stockPrice*stockQuantity}$</td>
+                </tr>`)
+        })  
+    }
+}
+
+//update local storage and update table
+var mainSellFunction = function(){
+    var userInformation = JSON.parse(localStorage.getItem('userInformation'));
+    var ownedStocks = userInformation.ownStocks
+   
+    const sellStockSymbol = $("option:selected").val()
+    const sellStockQuantity = $("#sellQuantity").val()
     //Update the local storage object after selling the product
     for(var i = 0; i < ownedStocks.length ; i++){
        if(ownedStocks[i].symbol == sellStockSymbol && ownedStocks[i].quantity == sellStockQuantity ){
-            userInformation.ownStocks.splice(i,1);
-            fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${sellStockSymbol}&apikey=${apiKey()}`)
-            .then(response => response.json()
-            .then(function(data){
-                userInformation.cash = userInformation.cash + parseFloat(data['Global Quote']['05. price']);
-                userInformation.transactions.push([sellStockSymbol,'sell',sellStockQuantity,moment().format('YYYY-MM-DD'),parseFloat(data['Global Quote']['05. price'])]);
-                stockWorth -= data['Global Quote']['05. price'] * sellStockQuantity;
-
-                saveToLocalStorage();
-                updateDashbord();
-            }));
-
-            
-            //save to local storage
-            saveToLocalStorage();
-
-            //update the list on the sell modal
-            availableStocksToSell();
-            updateDashbord();
-
+            userInformation.ownStocks.splice(i,1)
+            localStorage.setItem('userInformation',JSON.stringify(userInformation)) 
+            //Substract the sell worth from the total stock worth and total
+            substractSellInStockTotal(sellStockSymbol, sellStockQuantity)
+            //Remove the option from the select menu for the symbol that has been totally sold
+            $("#"+sellStockSymbol).remove()
+            const newUserInformation = JSON.parse(localStorage.getItem('userInformation'))
+            updateTableAfterSell(newUserInformation) 
         } else if (ownedStocks[i].symbol == sellStockSymbol && ownedStocks[i].quantity > sellStockQuantity){
-            userInformation.ownStocks[i].quantity = userInformation.ownStocks[i].quantity - sellStockQuantity;
-            fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${sellStockSymbol}&apikey=${apiKey()}`)
-            .then(response => response.json()
-            .then(function(data){
-                userInformation.cash = userInformation.cash + parseFloat(data['Global Quote']['05. price']);
-                userInformation.transactions.push([sellStockSymbol,'sell',sellStockQuantity,moment().format('YYYY-MM-DD'),parseFloat(data['Global Quote']['05. price'])]);
-                stockWorth -= data['Global Quote']['05. price'] * sellStockQuantity;
-
-                saveToLocalStorage();
-
-                updateDashbord();
-            }
-            ));
-            //save to local storage
-            saveToLocalStorage();
-
-            //update the list on the sell modal
-            availableStocksToSell()
-
-            //update the dashbord
-            updateDashbord();
+            userInformation.ownStocks[i].quantity = userInformation.ownStocks[i].quantity - sellStockQuantity
+            localStorage.setItem('userInformation',JSON.stringify(userInformation)) 
+            //Substract the sell worth from the total stock worth and total
+            substractSellInStockTotal(sellStockSymbol, sellStockQuantity)
+            //Call the updated userInformation object
+            const newUserInformation = JSON.parse(localStorage.getItem('userInformation'))
+            updateTableAfterSell(newUserInformation) 
         } else if (ownedStocks[i].symbol == sellStockSymbol && ownedStocks[i].quantity < sellStockQuantity) {
             $("#sellErrorMessage").css("display","flex")
             $("#sellErrorMessage").css("color","red")
@@ -276,6 +296,11 @@ var mainSellFunction = function(){
     }
     
 }
+
+
+$("#sellModalBtn").on("click",function(){
+    availableStocksToSell()
+})
 
 $("#sellBtn").on("click",function(){
     mainSellFunction()
@@ -351,11 +376,12 @@ $('#buyForm').submit(function(e){
             availableStocksToSell();
         }
     });
-
+    
 });
 
 
 checkIfUserExist();
+
 updateDashbord();
-availableStocksToSell()
+
 
