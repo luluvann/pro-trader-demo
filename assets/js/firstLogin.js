@@ -26,5 +26,5 @@ var saveToLocalStorage = function(){
 $("#firstLoginBtn").on("click", function(e){
     e.preventDefault()
     checkIfUserExist()
-    window.location.replace("./index.html")
+    window.location.replace("./indexdashboard.html")
 })
