@@ -95,7 +95,7 @@
                                     <thead>
                                         <tr>
                                             <th scope="col">Date</th>
-                                            <th scope="col">Sybbol</th>
+                                            <th scope="col">Symbol</th>
                                             <th scope="col">Buy/Sell</th>
                                             <th scope="col">Amount</th>
                                             <th scope="col">Price/unit</th>
@@ -176,7 +176,7 @@
                     <form id="symbolSearch">
                         <div class="mb-3">
                             <label for="symbolToSearch" class="form-label">Search For Symbol</label>
-                            <input type="text" class="form-control" id="symbolToSearch">
+                            <input type="text" class="form-control" id="symbolToSearch" placeholder="Search by company name. Ex: Microsoft">
                             <button type="submit" class="btn btn-primary mt-3 mb-3">Search</button>
                     </form>
                     <div id="searchResults"></div>
@@ -185,8 +185,7 @@
                         <div class="mb-3">
                             <label for="symbolToBuy" class="form-label">Symbol</label>
                             <input type="text" class="form-control" id="symbolToBuy"
-                                placeholder="type a symble you want to buy">
-                            <div class="form-text">You can search for a symbol on the top</div>
+                                placeholder="Type the symbol of the share you want to buy. Ex: MSFT">
                         </div>
                         <div class="mb-3">
                             <label for="buyQuantity" class="form-label">Quantity</label>
@@ -222,7 +221,6 @@
             integrity="sha384-j0CNLUeiqtyaRmlzUHCPZ+Gy5fQu0dQ6eZ/xAww941Ai1SxSY+0EQqNXNE6DZiVc"
             crossorigin="anonymous"></script>
         <script src="./assets/js/script.js"></script>
-
 </body>
 
 </html>
