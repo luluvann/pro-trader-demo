@@ -21,23 +21,17 @@
             <div class="col-2 text-cente bg-dark text-light p-4 p-lg-3 ">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#buyModal">
+                        <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#buyModal">
                             Buy
                         </button>
                     </li>
                     <li class="nav-item">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sellModal"
+                        <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#sellModal"
                             id="sellModalBtn">
                             Sell
                         </button>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="infoBtn">Info</a>
-                    </li>
                 </ul>
-                <select id="selector" class="form-select" aria-label="Default select example">
-                    <option selected>Select a stock to see the price </option>
-                </select>
 
             </div>
             <!--end of side of the menu-->
@@ -45,7 +39,7 @@
             <div class="col-10">
                 <div class="row">
                     <div class="row mt-5">
-                        <h2>Welcome to the Pro-Trader App, <span id="userName">someName</span>!</h2>
+                        <h2><span id="userName"></span>'s Pro Trader Dashboard</h2>
                     </div>
                     <div class="row m-5">
                         <h5 class="col">Cash: <span class="currentCash"></span> <span class="currency">USD</span></h5>
@@ -63,7 +57,7 @@
                 </div>
                 <div class="row justify-content-center bg-blue">
                     <!--My Stocks Table-->
-                    <div class="col-md-4 m-4" id="myStocks">
+                    <div class="col-md-5 m-4" id="myStocks">
                         <div class="card">
                             <div class="card-header">
                                 My Stocks
@@ -85,10 +79,10 @@
                         </div>
                     </div>
                     <!--Transactions table-->
-                    <div class="col-md-4 m-4" id="popularStocks">
+                    <div class="col-md-5 m-4" id="popularStocks">
                         <div class="card">
                             <div class="card-header">
-                                Your transactions
+                               My Transactions
                             </div>
                             <div class="card-body">
                                 <table class="table">
@@ -109,7 +103,7 @@
                         </div>
                     </div>
                     <!--Graphical Chart-->
-                    <div class="col-md-6 col-sm-8 m-4">
+                    <div class="col-md-8 col-sm-8 m-4">
                         <h3>My Portfolio worth</h3>
                         <canvas id="myChart"></canvas>
                     </div>
