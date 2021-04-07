@@ -260,19 +260,41 @@ var updateTableAfterSell = function(newUserInformation){
                 </tr>`)
         })  
     }
+
+}
+
+var addNewTransaction = function(sellStockSymbol,sellStockQuantity){
+    const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${sellStockSymbol}&apikey=demo`
+    fetch(url)
+    .then(response => response.json())
+    .then(function(data){
+       var stockPrice = parseFloat(data['Global Quote']['05. price']).toFixed(2)
+       //append new Transaction to table
+       $("#myTransactionTable").append(
+        `
+        <tr>
+            <td>${moment().format('YYYY-MM-DD')}</td>
+            <td>${sellStockSymbol}</td>
+            <td>sell</td>
+            <td>${sellStockQuantity}</td>
+            <td>${stockPrice*sellStockQuantity}$</td>
+        </tr>`)
+    })  
+   
 }
 
 //update local storage and update table
 var mainSellFunction = function(){
     var userInformation = JSON.parse(localStorage.getItem('userInformation'));
     var ownedStocks = userInformation.ownStocks
-   
     const sellStockSymbol = $("option:selected").val()
     const sellStockQuantity = $("#sellQuantity").val()
     //Update the local storage object after selling the product
     for(var i = 0; i < ownedStocks.length ; i++){
        if(ownedStocks[i].symbol == sellStockSymbol && ownedStocks[i].quantity == sellStockQuantity ){
             userInformation.ownStocks.splice(i,1)
+            //Add new transaction to Transactions local storage
+            userInformation.transactions.push([sellStockSymbol,"sell", moment().format('YYYY-MM-DD'),""])
             localStorage.setItem('userInformation',JSON.stringify(userInformation)) 
             //Substract the sell worth from the total stock worth and total
             substractSellInStockTotal(sellStockSymbol, sellStockQuantity)
@@ -280,6 +302,7 @@ var mainSellFunction = function(){
             $("#"+sellStockSymbol).remove()
             const newUserInformation = JSON.parse(localStorage.getItem('userInformation'))
             updateTableAfterSell(newUserInformation) 
+            addNewTransaction(sellStockSymbol,sellStockQuantity)
         } else if (ownedStocks[i].symbol == sellStockSymbol && ownedStocks[i].quantity > sellStockQuantity){
             userInformation.ownStocks[i].quantity = userInformation.ownStocks[i].quantity - sellStockQuantity
             localStorage.setItem('userInformation',JSON.stringify(userInformation)) 
@@ -288,6 +311,7 @@ var mainSellFunction = function(){
             //Call the updated userInformation object
             const newUserInformation = JSON.parse(localStorage.getItem('userInformation'))
             updateTableAfterSell(newUserInformation) 
+            addNewTransaction(sellStockSymbol,sellStockQuantity)
         } else if (ownedStocks[i].symbol == sellStockSymbol && ownedStocks[i].quantity < sellStockQuantity) {
             $("#sellErrorMessage").css("display","flex")
             $("#sellErrorMessage").css("color","red")
